@@ -3,6 +3,11 @@ from users.models import User, Payments
 
 
 class UserSerializer(serializers.ModelSerializer):
+    payment_history = serializers.SerializerMethodField()
+
+    def get_payment_history(self, user):
+        return [str(payment) for payment in Payments.objects.filter(user=user)]
+
     class Meta:
         model = User
         fields = '__all__'
