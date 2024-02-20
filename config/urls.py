@@ -21,4 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('lms/', include('lms.urls', namespace='lms')),
     path('user/', include('users.urls', namespace='user')),
+    path('payment/', include('payment.urls', namespace='payment')),
 ]
