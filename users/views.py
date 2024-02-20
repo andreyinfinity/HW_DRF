@@ -1,27 +1,27 @@
-from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
-from users.models import User, Payments
-from users.serializers import UserRegisterSerializer, UserSerializer, PaymentsSerializer
-from rest_framework.filters import OrderingFilter
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from users.models import User
+from users.permissions import OwnerPermissionsClass
+from users.serializers import UserSerializer
 
 
 class UserRegister(generics.CreateAPIView):
-    serializer_class = UserRegisterSerializer
+    serializer_class = UserSerializer
+    permission_classes = [AllowAny]
 
 
 class UserRetrieve(generics.RetrieveAPIView):
+    permission_classes = [IsAuthenticated, OwnerPermissionsClass]
     serializer_class = UserSerializer
     queryset = User.objects.all()
 
 
 class UserUpdate(generics.UpdateAPIView):
+    permission_classes = [OwnerPermissionsClass]
     serializer_class = UserSerializer
     queryset = User.objects.all()
 
 
-class PaymentList(generics.ListAPIView):
-    serializer_class = PaymentsSerializer
-    queryset = Payments.objects.all()
-    filter_backends = [OrderingFilter, DjangoFilterBackend]
-    ordering_fields = ['date_of_payment']
-    filterset_fields = ['payment_method', 'paid_course', 'paid_lesson']
+class UserDelete(generics.DestroyAPIView):
+    permission_classes = [OwnerPermissionsClass]
+    queryset = User.objects.all()
