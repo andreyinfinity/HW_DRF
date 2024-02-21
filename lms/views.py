@@ -27,6 +27,8 @@ class CourseViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ['list', 'retrieve', 'update']:
             permission_classes = [OwnerPermissionsClass | ModeratorPermissionsClass]
+        elif self.action in ['destroy']:
+            permission_classes = [OwnerPermissionsClass]
         else:
             permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
@@ -44,6 +46,7 @@ class LessonCreate(generics.CreateAPIView):
 class LessonList(generics.ListAPIView):
     serializer_class = LessonSerializer
     pagination_class = LessonPaginator
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         if self.request.user.groups.filter(name='moderator').exists():
