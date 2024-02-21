@@ -9,6 +9,12 @@ class UserRegister(generics.CreateAPIView):
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
 
+    def perform_create(self, serializer):
+        new_user = serializer.save()
+        password = serializer.data.get("password")
+        new_user.set_password(password)
+        new_user.save()
+
 
 class UserRetrieve(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated, OwnerPermissionsClass]
@@ -20,6 +26,12 @@ class UserUpdate(generics.UpdateAPIView):
     permission_classes = [OwnerPermissionsClass]
     serializer_class = UserSerializer
     queryset = User.objects.all()
+
+    def perform_update(self, serializer):
+        user = serializer.save()
+        password = serializer.data.get("password")
+        user.set_password(password)
+        user.save()
 
 
 class UserDelete(generics.DestroyAPIView):
