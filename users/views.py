@@ -10,10 +10,9 @@ class UserRegister(generics.CreateAPIView):
     permission_classes = [AllowAny]
 
     def perform_create(self, serializer):
-        new_user = serializer.save()
-        password = serializer.data.get("password")
-        new_user.set_password(password)
-        new_user.save()
+        user = serializer.save(is_active=True)
+        user.set_password(user.password)
+        user.save()
 
 
 class UserRetrieve(generics.RetrieveAPIView):
@@ -29,8 +28,7 @@ class UserUpdate(generics.UpdateAPIView):
 
     def perform_update(self, serializer):
         user = serializer.save()
-        password = serializer.data.get("password")
-        user.set_password(password)
+        user.set_password(user.password)
         user.save()
 
 
