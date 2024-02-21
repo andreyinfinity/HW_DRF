@@ -1,7 +1,10 @@
 from rest_framework import generics, viewsets
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from lms.models import Course, Lesson
+from lms.models import Course, Lesson, Subscribe
+from lms.paginators import CoursePaginator, LessonPaginator
 from lms.serializers import CourseSerializer, LessonSerializer
 from users.permissions import ModeratorPermissionsClass, OwnerPermissionsClass
 
@@ -9,9 +12,11 @@ from users.permissions import ModeratorPermissionsClass, OwnerPermissionsClass
 class CourseViewSet(viewsets.ModelViewSet):
     serializer_class = CourseSerializer
     queryset = Course.objects.all()
+    pagination_class = CoursePaginator
 
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+        course = serializer.save(owner=self.request.user)
+        course.save()
 
     def get_queryset(self):
         if self.request.user.groups.filter(name='moderator').exists():
@@ -29,13 +34,16 @@ class CourseViewSet(viewsets.ModelViewSet):
 
 class LessonCreate(generics.CreateAPIView):
     serializer_class = LessonSerializer
+    # permission_classes = [AllowAny]
 
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+        lesson = serializer.save(owner=self.request.user)
+        lesson.save()
 
 
 class LessonList(generics.ListAPIView):
     serializer_class = LessonSerializer
+    pagination_class = LessonPaginator
 
     def get_queryset(self):
         if self.request.user.groups.filter(name='moderator').exists():
@@ -59,3 +67,21 @@ class LessonUpdate(generics.UpdateAPIView):
 class LessonDestroy(generics.DestroyAPIView):
     permission_classes = [OwnerPermissionsClass]
     queryset = Lesson.objects.all()
+
+
+class SubscribeAPI(APIView):
+    def post(self, *args, **kwargs):
+        user = self.request.user
+        course_id = self.request.data.get('course_id')
+        course_item = Course.objects.get(pk=course_id)
+        subs_item = Subscribe.objects.filter(subscriber=user, course=course_item)
+        # Если подписка у пользователя на этот курс есть - удаляем ее
+        if subs_item.exists():
+            subs_item.delete()
+            message = 'подписка удалена'
+        # Если подписки у пользователя на этот курс нет - создаем ее
+        else:
+            Subscribe.objects.create(subscriber=user, course=course_item)
+            message = 'подписка добавлена'
+        # Возвращаем ответ в API
+        return Response({"message": message})
