@@ -1,5 +1,5 @@
 from rest_framework import generics, viewsets
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -46,7 +46,7 @@ class LessonCreate(generics.CreateAPIView):
 class LessonList(generics.ListAPIView):
     serializer_class = LessonSerializer
     pagination_class = LessonPaginator
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         if self.request.user.groups.filter(name='moderator').exists():

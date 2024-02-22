@@ -28,6 +28,11 @@ class UserRetrieve(generics.RetrieveAPIView):
         return self.serializer_class
 
 
+class UserList(generics.ListAPIView):
+    serializer_class = OtherUserSerializer
+    queryset = User.objects.all()
+
+
 class UserUpdate(generics.UpdateAPIView):
     permission_classes = [IsSelf]
     serializer_class = UserSerializer
