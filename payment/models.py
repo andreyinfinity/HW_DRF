@@ -22,7 +22,9 @@ class Payments(models.Model):
     paid_lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, verbose_name='оплаченный урок', **NULLABLE)
     payment_amount = models.PositiveIntegerField(verbose_name='сумма оплаты')
     payment_method = models.CharField(max_length=50, choices=PAYMENT_CHOICES, verbose_name='способ оплаты')
-    transaction_id = models.CharField(max_length=500, verbose_name='id транзакции', default='', **NULLABLE)
+    product = models.CharField(max_length=500, verbose_name='id продукта', default='', **NULLABLE)
+    transaction_id = models.CharField(max_length=500, verbose_name='id сессии оплаты', default='', **NULLABLE)
+    transaction_link = models.URLField(max_length=400, verbose_name="ссылка на оплату", **NULLABLE)
     status = models.CharField(max_length=50, choices=PAYMENT_STATUS, verbose_name='статус оплаты', default='unpaid')
 
     def __str__(self):

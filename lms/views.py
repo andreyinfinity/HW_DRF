@@ -5,7 +5,6 @@ from rest_framework.views import APIView
 from lms.models import Course, Lesson, Subscribe
 from lms.paginators import CoursePaginator, LessonPaginator
 from lms.serializers import CourseSerializer, LessonSerializer
-from lms.services import buy_course, check_payment_status
 from users.permissions import ModeratorPermissionsClass, OwnerPermissionsClass
 
 
@@ -108,18 +107,3 @@ class SubscribeAPI(APIView):
             message = 'подписка добавлена'
         # Возвращаем ответ в API
         return Response({"message": message})
-
-
-class CourseBuy(APIView):
-    def get(self, *args, **kwargs):
-        user = self.request.user
-        course = Course.objects.get(pk=kwargs.get('pk'))
-        url = buy_course(course=course, user=user)
-        return Response({'url': url})
-
-
-class CourseStatus(APIView):
-    def get(self, *args, **kwargs):
-        user = self.request.user
-        orders = check_payment_status(user=user)
-        return Response(orders)
