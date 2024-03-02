@@ -70,7 +70,7 @@ class LessonCreate(generics.CreateAPIView):
             stripe_product=stripe_product,
             stripe_price=stripe_price,
         )
-        send_notification(serializer.validated_data)
+        send_notification.delay(serializer.validated_data)
 
 
 class LessonList(generics.ListAPIView):
@@ -101,14 +101,16 @@ class LessonUpdate(generics.UpdateAPIView):
 
     def perform_update(self, serializer):
         """Метод для добавления текущего пользователя в качестве владельца"""
-        lesson = serializer.save(owner=self.request.user)
-        lesson.save()
-        send_notification(serializer.data)
+        serializer.save(owner=self.request.user)
+        send_notification.delay(serializer.data)
 
 
 class LessonDestroy(generics.DestroyAPIView):
     permission_classes = [OwnerPermissionsClass]
     queryset = Lesson.objects.all()
+
+    def perform_destroy(self, instance):
+        send_notification.delay(instance)
 
 
 class SubscribeAPI(APIView):
