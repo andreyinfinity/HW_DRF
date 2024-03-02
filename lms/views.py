@@ -6,6 +6,7 @@ from lms.models import Course, Lesson, Subscribe
 from lms.paginators import CoursePaginator, LessonPaginator
 from lms.serializers import CourseSerializer, LessonSerializer
 from lms.tasks import send_notification
+from payment.services import create_stripe_product, create_stripe_price
 from users.permissions import ModeratorPermissionsClass, OwnerPermissionsClass
 
 
@@ -15,9 +16,17 @@ class CourseViewSet(viewsets.ModelViewSet):
     pagination_class = CoursePaginator
 
     def perform_create(self, serializer):
-        """Метод для добавления пользователя при создании объекта"""
-        course = serializer.save(owner=self.request.user)
-        course.save()
+        """Метод для добавления пользователя при создании объекта
+        и интеграция Stripe"""
+        course_name = serializer.validated_data["name"]
+        amount = serializer.validated_data["amount"]
+        stripe_product = create_stripe_product(course_name)
+        stripe_price = create_stripe_price(stripe_product.id, amount)
+        serializer.save(
+            owner=self.request.user,
+            stripe_product=stripe_product.id,
+            stripe_price=stripe_price.id,
+        )
 
     def get_queryset(self):
         """
@@ -50,10 +59,18 @@ class LessonCreate(generics.CreateAPIView):
     permission_classes = [IsAuthenticated, ~ModeratorPermissionsClass]
 
     def perform_create(self, serializer):
-        """Метод для добавления текущего пользователя в качестве владельца"""
-        lesson = serializer.save(owner=self.request.user)
-        lesson.save()
-        send_notification(serializer.data)
+        """Метод для добавления текущего пользователя в качестве владельца,
+        интеграция Stripe"""
+        lesson_name = serializer.validated_data["name"]
+        amount = serializer.validated_data["amount"]
+        stripe_product = create_stripe_product(lesson_name)
+        stripe_price = create_stripe_price(stripe_product, amount)
+        serializer.save(
+            owner=self.request.user,
+            stripe_product=stripe_product,
+            stripe_price=stripe_price,
+        )
+        send_notification(serializer.validated_data)
 
 
 class LessonList(generics.ListAPIView):
