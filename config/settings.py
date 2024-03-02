@@ -50,6 +50,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'rest_framework_simplejwt',
+    'drf_yasg',
+    'django_celery_beat',
+
     'users',
     'payment',
     'lms',
@@ -142,9 +145,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Users authentication
 AUTH_USER_MODEL = 'users.User'
-# LOGIN_REDIRECT_URL = 'users:profile'
-# LOGOUT_REDIRECT_URL = 'users:login'
-# LOGIN_URL = 'users:login'
 
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -161,6 +161,29 @@ REST_FRAMEWORK = {
 
 # Настройки срока действия токенов
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=150),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 }
+
+# Интеграция с сервисом Stripe.com
+STRIPE_KEY = os.getenv('STRIPE_KEY')
+
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+
+# Настройка периодических задач
+CELERY_BEAT_SCHEDULE = {
+    'task-name': {
+        'task': 'users.tasks.check_last_login',
+        'schedule': timedelta(days=1),
+    },
+}
+
+# email config
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_PORT = 465
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')

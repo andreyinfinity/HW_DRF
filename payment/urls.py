@@ -7,5 +7,5 @@ app_name = PaymentConfig.name
 
 urlpatterns = [
     path('payments/', views.PaymentList.as_view(), name='payments'),
-
+    path('buy/', views.PaymentCrete.as_view(), name='buy'),
 ]
