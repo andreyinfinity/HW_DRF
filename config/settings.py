@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'django_filters',
     'rest_framework_simplejwt',
     'drf_yasg',
+    'django_celery_beat',
 
     'users',
     'payment',
@@ -169,3 +170,7 @@ SIMPLE_JWT = {
 
 # Интеграция с сервисом Stripe.com
 STRIPE_KEY = os.getenv('STRIPE_KEY')
+
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'

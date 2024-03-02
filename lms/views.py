@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from lms.models import Course, Lesson, Subscribe
 from lms.paginators import CoursePaginator, LessonPaginator
 from lms.serializers import CourseSerializer, LessonSerializer
+from lms.tasks import send_notification
 from users.permissions import ModeratorPermissionsClass, OwnerPermissionsClass
 
 
@@ -52,6 +53,7 @@ class LessonCreate(generics.CreateAPIView):
         """Метод для добавления текущего пользователя в качестве владельца"""
         lesson = serializer.save(owner=self.request.user)
         lesson.save()
+        send_notification(serializer.data)
 
 
 class LessonList(generics.ListAPIView):
@@ -84,6 +86,7 @@ class LessonUpdate(generics.UpdateAPIView):
         """Метод для добавления текущего пользователя в качестве владельца"""
         lesson = serializer.save(owner=self.request.user)
         lesson.save()
+        send_notification(serializer.data)
 
 
 class LessonDestroy(generics.DestroyAPIView):
@@ -92,7 +95,7 @@ class LessonDestroy(generics.DestroyAPIView):
 
 
 class SubscribeAPI(APIView):
-    def post(self, *args, **kwargs):
+    def get(self, *args, **kwargs):
         """Метод для изменения состояния подписки"""
         user = self.request.user
         course = Course.objects.get(pk=kwargs.get('pk'))
