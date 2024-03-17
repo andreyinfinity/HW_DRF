@@ -16,5 +16,4 @@ class OwnerPermissionsClass(BasePermission):
 class IsSelf(BasePermission):
     """Проверка является ли пользователь сам собой"""
     def has_object_permission(self, request, view, obj):
-        print(obj)
         return request.user == obj

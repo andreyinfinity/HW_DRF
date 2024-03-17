@@ -98,6 +98,7 @@ DATABASES = {
         'NAME': os.getenv('POSTGRES_DB'),
         'USER': os.getenv('POSTGRES_USER'),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': 'db'
     }
 }
 
@@ -169,8 +170,8 @@ SIMPLE_JWT = {
 STRIPE_KEY = os.getenv('STRIPE_KEY')
 
 
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
 
 # Настройка периодических задач
 CELERY_BEAT_SCHEDULE = {
